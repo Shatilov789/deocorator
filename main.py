@@ -1,4 +1,4 @@
-KEYWORDS = ['контента', ' google', 'прочитал']
+KEYWORDS = ['контента', 'комплекс', 'SQL']
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -7,26 +7,27 @@ ret = requests.get('https://habr.com/ru/all/')
 text = ret.text
 soup = BeautifulSoup(text, 'html.parser')
 post_preview = soup.find_all('article', class_='post post_preview')
+path ='C:\Личное\Logs.txt'
+def parametrized_decor(parameter):
+    def log_time(scraping):
+        f = open(parameter, 'a', encoding='utf8')
+        f.write(f'Имя функции: {scraping.__name__}' + '\n')
 
+        def new_log(*args, **kwargs):
+            data_log = datetime.now()
+            date = data_log.strftime("%A-%d-%B %Y %I:%M:%S %p")
+            result = scraping(post_preview)
+            f.write(f'{date} -- Статьи с сайта: {str(site)}' + '\n')
+            f.write(f'{date} -- Слова поиска: {str(KEYWORDS)}' + '\n')
+            f.write(f'{date} -- Результат скрапинга: {str(result)}' + '\n')
+            # f.write(f'{date} -- Aргумент "args": {args}' + '\n')
+            # f.write(f'{date} -- Aргумент "kwargs": {kwargs}' + '\n')
 
-def log_time(scraping):
-    f = open(r'C:\Личное\Logs.txt', 'a', encoding='utf8')
-    f.write(f'Имя функции: {scraping.__name__}' + '\n')
+            return result
+        return new_log
+    return log_time
 
-    def new_log(*args, **kwargs):
-        data_log = datetime.now()
-        date = data_log.strftime("%A-%d-%B %Y %I:%M:%S %p")
-        result = scraping(post_preview)
-        f.write(f'{date} -- Статьи с сайта: {str(site)}' + '\n')
-        f.write(f'{date} -- Слова поиска: {str(KEYWORDS)}' + '\n')
-        f.write(f'{date} -- Результат скрапинга: {str(result)}' + '\n')
-        # f.write(f'{date} -- Aргумент "args": {args}' + '\n')
-        # f.write(f'{date} -- Aргумент "kwargs": {kwargs}' + '\n')
-
-        return result
-    return new_log
-
-@log_time
+@parametrized_decor(parameter=path)
 def web_scraping(post_preview):
     all_result = []
     for hub in post_preview:
